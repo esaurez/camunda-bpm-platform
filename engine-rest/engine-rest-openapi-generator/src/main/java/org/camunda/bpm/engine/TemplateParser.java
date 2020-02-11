@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.camunda.bpm.engine.rest;
+package org.camunda.bpm.engine;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,25 +22,22 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.io.FileUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-
-import freemarker.core.ParseException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 public class TemplateParser {
 
-  public static void main(String[] args) throws ParseException, IOException, TemplateException {
+  public static void main(String[] args) throws IOException, TemplateException {
 
     if (args.length != 3) {
-      throw new RuntimeException("Must provide two arguments: <source template directory> <main template> <output directory>");
+      throw new RuntimeException("Must provide three arguments: <source template directory> <main template> <output directory>");
     }
 
     String sourceDirectory = args[0];
@@ -55,19 +52,20 @@ public class TemplateParser {
     Template template = cfg.getTemplate(mainTemplate);
 
     Map<String, Object> templateData = createTemplateData();
-
+    String formattedJson = null;
     try (StringWriter out = new StringWriter()) {
 
       template.process(templateData, out);
 
       // format json with Gson
       String jsonString = out.getBuffer().toString();
-      String formattedJson = formatJsonString(jsonString);
+      formattedJson = formatJsonString(jsonString);
 
       File outFile = new File(outputFile);
       FileUtils.forceMkdir(outFile.getParentFile());
       Files.write(outFile.toPath(), formattedJson.getBytes());
     }
+
   }
 
   private static Map<String, Object> createTemplateData() {
