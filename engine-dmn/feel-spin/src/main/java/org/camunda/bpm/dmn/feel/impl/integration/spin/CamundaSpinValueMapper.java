@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static scala.jdk.CollectionConverters.ListHasAsScala;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,21 +31,27 @@ import java.util.function.Function;
 
 import org.camunda.feel.impl.spi.JavaCustomValueMapper;
 import org.camunda.feel.interpreter.impl.Context.StaticContext;
+import org.camunda.feel.interpreter.impl.DefaultValueMapper;
 import org.camunda.feel.interpreter.impl.Val;
 import org.camunda.feel.interpreter.impl.ValContext;
 import org.camunda.feel.interpreter.impl.ValList;
-import org.camunda.feel.interpreter.impl.ValNull$;spinXmlToVal
 import org.camunda.feel.interpreter.impl.ValString;
+import org.camunda.feel.interpreter.impl.ValueMapper;
 import org.camunda.spin.json.SpinJsonNode;
 import org.camunda.spin.xml.SpinXmlAttribute;
 import org.camunda.spin.xml.SpinXmlElement;
 import org.camunda.spin.xml.SpinXmlNode;
-import scala.Tuple2;
+import scala.Function1;
 import scala.collection.immutable.Map$;
-import scala.collection.immutable.Seq;
 
 
 public class CamundaSpinValueMapper extends JavaCustomValueMapper {
+
+  ValueMapper valueMapper;
+
+  public CamundaSpinValueMapper(ValueMapper valueMapper) {
+    this.valueMapper = valueMapper;
+  }
 
   @Override
   public Optional<Val> toValue(Object x, Function<Object, Val> innerValueMapper) {
@@ -76,14 +83,15 @@ public class CamundaSpinValueMapper extends JavaCustomValueMapper {
     if (node.isObject()) {
       Map pairs = node.fieldNames().stream()
         .collect(toMap(field -> field, field -> spinJsonToVal(node.prop(field), innerValueMapper)));
-      return new ValContext(new StaticContext(toScalaImmutableMap(pairs), null));
+      return valueMapper.toVal(pairs);
 
     } else if (node.isArray()) {
       java.util.List<Val> values = node.elements().stream().map(e -> spinJsonToVal(e, innerValueMapper)).collect(toList());
       return new ValList(ListHasAsScala(values).asScala().toList());
 
     } else if (node.isNull()) {
-       return new ValNull$();
+      return innerValueMapper.apply(null);
+
     } else {
       return innerValueMapper.apply(node.value());
 
@@ -93,21 +101,22 @@ public class CamundaSpinValueMapper extends JavaCustomValueMapper {
   protected Val spinXmlToVal(SpinXmlElement element) {
     String name = nodeName(element);
     Val value = spinXmlElementToVal(element);
-    scala.collection.immutable.Map map = new scala.collection.immutable.Map.Map1(name, value);
+    Map<String, Object> map = Collections.singletonMap(name, value);
 
-    return new ValContext(new StaticContext(map, null));
+    return valueMapper.toVal(map);
   }
 
   protected Val spinXmlElementToVal(final SpinXmlElement e) {
-    Map<String, Object> membersMap = new HashMap();
-
+    Map<String, Object> membersMap = new HashMap<>();
     String content = e.textContent().trim();
     if (!content.isEmpty()) {
       membersMap.put("$content", new ValString(content));
     }
 
     Map<String, ValString> attributes = e.attrs().stream().collect(toMap(attr -> spinXmlAttributeToKey(attr), attr -> new ValString(attr.value())));
-    membersMap.putAll(attributes);
+    if (!attributes.isEmpty()) {
+      membersMap.putAll(attributes);
+    }
 
     Map<String, Val> childrenMap = e.childElements().stream()
      .collect(
@@ -117,19 +126,20 @@ public class CamundaSpinValueMapper extends JavaCustomValueMapper {
                  ))
      .entrySet().stream()
        .collect(toMap(entry -> entry.getKey(), entry -> {
-         scala.collection.immutable.List vals = ListHasAsScala(entry.getValue()).asScala().toList();
-         if (!vals.isEmpty()) {
+         List<Val> valList = entry.getValue();
+         if (!valList.isEmpty() && valList.size() > 1) {
+           scala.collection.immutable.List<Val> vals = ListHasAsScala(valList).asScala().toList();
            return new ValList(vals);
          } else {
-           return new ValNull$();
+           return valList.get(0);
          }
        }));
     membersMap.putAll(childrenMap);
 
     if (membersMap.isEmpty()) {
-      return new ValNull$();
+      return valueMapper.toVal(null);
     } else {
-      return new ValContext(new StaticContext(toScalaImmutableMap(membersMap), null));
+      return valueMapper.toVal(membersMap);
     }
   }
 
@@ -138,20 +148,9 @@ public class CamundaSpinValueMapper extends JavaCustomValueMapper {
   }
 
   protected String nodeName(SpinXmlNode n) {
-    return Optional.of(n.prefix())
-                   .map(p -> p + "$" + n.name())
-                   .orElse(n.name());
-  }
-
-  protected <K, V> scala.collection.immutable.Map<K, V> toScalaImmutableMap(Map<K, V> javaMap) {
-    List<Tuple2<K, V>> tuples = javaMap.entrySet()
-                                    .stream()
-                                    .map(e -> Tuple2.apply(e.getKey(), e.getValue()))
-                                    .collect(toList());
-
-    Seq<Tuple2<K, V>> scalaSeq = ListHasAsScala(tuples).asScala().toSeq();
-
-    return Map$.MODULE$.apply(scalaSeq);
+    String prefix = n.prefix();
+    String name = n.name();
+    return (prefix != null && !prefix.isEmpty())? prefix + "$" + name : name;
   }
 }
 

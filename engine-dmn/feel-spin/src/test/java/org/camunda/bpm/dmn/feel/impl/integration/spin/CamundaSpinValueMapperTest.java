@@ -16,25 +16,32 @@
  */
 package org.camunda.bpm.dmn.feel.impl.integration.spin;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static scala.jdk.CollectionConverters.ListHasAsScala;
+
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.camunda.feel.impl.spi.CustomValueMapper;
+import org.camunda.feel.impl.spi.JavaValueMapper;
 import org.camunda.feel.interpreter.impl.Context;
 import org.camunda.feel.interpreter.impl.DefaultValueMapper;
 import org.camunda.feel.interpreter.impl.Val;
 import org.camunda.feel.interpreter.impl.ValContext;
 import org.camunda.feel.interpreter.impl.ValList;
+import org.camunda.feel.interpreter.impl.ValNumber;
 import org.camunda.feel.interpreter.impl.ValString;
 import org.camunda.feel.interpreter.impl.ValueMapper;
 import org.camunda.spin.Spin;
 import org.camunda.spin.json.SpinJsonNode;
-import org.junit.Before;
+import org.camunda.spin.xml.SpinXmlElement;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static scala.jdk.CollectionConverters.ListHasAsScala;
+import scala.collection.immutable.Map;
+import scala.collection.immutable.Map$;
+import scala.jdk.CollectionConverters;
 
 public class CamundaSpinValueMapperTest {
 
@@ -42,15 +49,19 @@ public class CamundaSpinValueMapperTest {
 
   @BeforeClass
   public static void setUp() {
-    List<CustomValueMapper> mapperList = Arrays.asList(DefaultValueMapper.instance(), new CamundaSpinValueMapper());
+    DefaultValueMapper defaultValueMapper = DefaultValueMapper.instance();
+    List<CustomValueMapper> defaultCompositeMapper = Collections.singletonList(defaultValueMapper);
+    CamundaSpinValueMapper spinValueMapper = new CamundaSpinValueMapper(new ValueMapper.CompositeValueMapper(ListHasAsScala(defaultCompositeMapper).asScala().toList()));
+
+    List<CustomValueMapper> mapperList = Arrays.asList(defaultValueMapper, spinValueMapper);
     valueMapper = new ValueMapper.CompositeValueMapper(ListHasAsScala(mapperList).asScala().toList());
   }
 
   @Test
   public void shouldMapCamundaSpinJSONobjectAsContext() {
     // given
-    scala.collection.immutable.Map map = new scala.collection.immutable.Map.Map2("customer", new ValString("Kermit"), "language", new ValString("en"));
-    ValContext context = new ValContext(new Context.StaticContext(map, null));
+    Map map = new Map.Map2("customer", new ValString("Kermit"), "language", new ValString("en"));
+    ValContext context = new ValContext(new Context.StaticContext(map, Map$.MODULE$.empty()));
     SpinJsonNode json = Spin.JSON("{\"customer\": \"Kermit\", \"language\": \"en\"}");
 
     // when
@@ -60,177 +71,176 @@ public class CamundaSpinValueMapperTest {
     assertThat(value).isEqualTo(context);
   }
 
-//  @Test
-//  public void shouldMapCamundaSpinJSONarrayAsList() {
-//    // given
-//    scala.collection.immutable.Map map = new scala.collection.immutable.Map.Map2("customer", new ValList(new scala.collection.immutable.List), "language", new ValString("en"));
-//    ValContext context = new ValContext(new Context.StaticContext(map, null));
-//    SpinJsonNode json = Spin.JSON("{\"customer\": [\"Kermit\", \"Waldo\"]}");
-//
-//    // when
-//    Val value = valueMapper.toVal(json);
-//
-//    // then
-//    should be(
-//      ValContext(
-//        Context.StaticContext(
-//          Map(
-//            "customer" -> ValList(List(
-//      ValString("Kermit"),
-//      ValString("Waldo")
-//                                      ))
-//          )))
-//    )
-//  }
-//
-//  @Test
-//  public void shouldMapNestedCamundaSpinJSONobjectAsContext() {
-//    val json: SpinJsonNode = Spin.JSON(
-//      """{"customer": "Kermit", "address": {"city": "Berlin", "zipCode": 10961}}""")
-//
-//    valueMapper.toVal(json) should be(
-//      ValContext(
-//        Context.StaticContext(
-//          Map(
-//            "customer" -> ValString("Kermit"),
-//      "address" -> ValContext(
-//      Context.StaticContext(
-//        Map(
-//          "city" -> ValString("Berlin"),
-//      "zipCode" -> ValNumber(10961)
-//                )
-//              )
-//            )
-//          )))
-//    )
-//  }
-//
-//  @Test
-//  public void shouldMapCamundaSpinXMLobjectWithAttributes() {
-//    val xml: SpinXmlElement = Spin.XML(
-//      """
-//      <customer name="Kermit" language="en" />
-//    """)
-//
-//    valueMapper.toVal(xml) should be(
-//      ValContext(
-//        Context.StaticContext(
-//          Map(
-//            "customer" -> ValContext(
-//      Context.StaticContext(
-//        Map(
-//          "@name" -> ValString("Kermit"),
-//      "@language" -> ValString("en")
-//                )
-//              )
-//            )
-//          )))
-//    )
-//  }
-//
-//  @Test
-//  public void shouldMapCamundaSpinXMLobjectWithChildObject() {
-//    val xml: SpinXmlElement = Spin.XML(
-//      """
-//      <customer>
-//        <address city="Berlin" zipCode="10961" />
-//      </customer>
-//    """)
-//
-//    valueMapper.toVal(xml) should be(
-//      ValContext(Context.StaticContext(Map(
-//        "customer" -> ValContext(Context.StaticContext(Map(
-//      "address" -> ValContext(Context.StaticContext(Map(
-//      "@city" -> ValString("Berlin"),
-//      "@zipCode" -> ValString("10961")
-//          )))
-//        )))
-//      )))
-//    )
-//  }
-//
-//  @Test
-//  public void shouldMapCamundaSpinXMLobjectWithListOfChildObjects() {
-//    val xml: SpinXmlElement = Spin.XML(
-//      """
-//      <data>
-//        <customer name="Kermit" language="en" />
-//        <customer name="John" language="de" />
-//        <provider name="Foobar" />
-//      </data>
-//    """)
-//
-//    valueMapper.toVal(xml) should be(
-//      ValContext(Context.StaticContext(Map(
-//        "data" -> ValContext(Context.StaticContext(Map(
-//      "customer" -> ValList(List(
-//      ValContext(Context.StaticContext(Map(
-//        "@name" -> ValString("Kermit"),
-//      "@language" -> ValString("en")
-//            ))),
-//    ValContext(Context.StaticContext(Map(
-//      "@name" -> ValString("John"),
-//      "@language" -> ValString("de")
-//            )))
-//          )),
-//    "provider" -> ValContext(Context.StaticContext(Map(
-//      "@name" -> ValString("Foobar")
-//          )))
-//        )))
-//      )))
-//    )
-//  }
-//
-//  @Test
-//  public void shouldMapCamundaSpinXMLobjectWithContent() {
-//    val xml: SpinXmlElement = Spin.XML(
-//      """
-//      <customer>Kermit</customer>
-//    """)
-//
-//    valueMapper.toVal(xml) should be(
-//      ValContext(Context.StaticContext(Map(
-//        "customer" -> ValContext(Context.StaticContext(Map(
-//      "$content" -> ValString("Kermit")
-//        )))
-//      )))
-//    )
-//  }
-//
-//  @Test
-//  public void shouldMapCamundaSpinXMLobjectWithoutContent() {
-//    val xml: SpinXmlElement = Spin.XML(
-//      """
-//      <customer />
-//    """)
-//
-//    valueMapper.toVal(xml) should be(
-//      ValContext(Context.StaticContext(Map(
-//        "customer" -> ValNull
-//      )))
-//    )
-//  }
-//
-//  @Test
-//  public void shouldMapCamundaSpinXMLobjectWithPrefix() {
-//    val xml: SpinXmlElement =
-//      Spin.XML(
-//        """
-//      <data xmlns:p="http://www.example.org">
-//        <p:customer p:name="Kermit" language="en" />
-//      </data>
-//    """)
-//
-//    valueMapper.toVal(xml) should be(
-//      ValContext(Context.StaticContext(Map(
-//        "data" -> ValContext(Context.StaticContext(Map(
-//      "p$customer" -> ValContext(Context.StaticContext(Map(
-//      "@p$name" -> ValString("Kermit"),
-//      "@language" -> ValString("en")
-//          ))),
-//    "@xmlns$p" -> ValString("http://www.example.org")
-//        )))
-//      )))
-//    )
-//  }
+  @Test
+  public void shouldMapCamundaSpinJSONarrayAsList() {
+    // given
+    List<Val> list = Arrays.asList(new ValString("Kermit"), new ValString("Waldo"));
+    ValList feelList = (ValList) valueMapper.toVal(list);
+    ValContext context = (ValContext) valueMapper.toVal(new Map.Map1("customer", feelList));
+    SpinJsonNode json = Spin.JSON("{\"customer\": [\"Kermit\", \"Waldo\"]}");
+
+    // when
+    Val value = valueMapper.toVal(json);
+
+    // then
+    assertThat(value).isEqualTo(context);
+  }
+
+  @Test
+  public void shouldMapNestedCamundaSpinJSONobjectAsContext() {
+
+    // given
+    java.util.Map nestedMap = new HashMap<String, Val>();
+    nestedMap.put("city", new ValString("Berlin"));
+    nestedMap.put("zipCode", valueMapper.toVal(10961));
+
+    java.util.Map contextMap = new HashMap<String, Val>();
+    contextMap.put("customer", new ValString("Kermit"));
+    contextMap.put("address", valueMapper.toVal(nestedMap));
+
+    ValContext context = (ValContext) valueMapper.toVal(contextMap);
+    SpinJsonNode json = Spin.JSON("{\"customer\": \"Kermit\", \"address\": {\"city\": \"Berlin\", \"zipCode\": 10961}}");
+
+    // when
+    Val value = valueMapper.toVal(json);
+
+    // then
+    assertThat(value).isEqualTo(context);
+  }
+
+  @Test
+  public void shouldMapCamundaSpinXMLobjectWithAttributes() {
+    // given
+    java.util.Map xmlInnerMap = new HashMap();
+    xmlInnerMap.put("@name", new ValString("Kermit"));
+    xmlInnerMap.put("@language", new ValString("en"));
+    java.util.Map xmlContextMap = new HashMap();
+    xmlContextMap.put("customer", valueMapper.toVal(xmlInnerMap));
+
+    ValContext context = (ValContext) valueMapper.toVal(xmlContextMap);
+    SpinXmlElement xml = Spin.XML(" <customer name=\"Kermit\" language=\"en\" /> ");
+
+    // when
+    Val value = valueMapper.toVal(xml);
+
+    // then
+    assertThat(value).isEqualTo(context);
+  }
+
+  @Test
+  public void shouldMapCamundaSpinXMLobjectWithChildObject() {
+    // given
+    java.util.Map xmlAttrMap = new HashMap();
+    xmlAttrMap.put("@city", new ValString("Berlin"));
+    xmlAttrMap.put("@zipCode", new ValString("10961"));
+    java.util.Map xmlInnerMap = new HashMap();
+    xmlInnerMap.put("address", valueMapper.toVal(xmlAttrMap));
+    java.util.Map xmlContextMap = new HashMap();
+    xmlContextMap.put("customer", valueMapper.toVal(xmlInnerMap));
+
+    ValContext context = (ValContext) valueMapper.toVal(xmlContextMap);
+    SpinXmlElement xml = Spin.XML("<customer><address city=\"Berlin\" zipCode=\"10961\" /></customer>");
+
+    // when
+    Val value = valueMapper.toVal(xml);
+
+    // then
+    assertThat(value).isEqualTo(context);
+  }
+
+  @Test
+  public void shouldMapCamundaSpinXMLobjectWithListOfChildObjects() {
+    // given
+    SpinXmlElement xml = Spin.XML("<data>" +
+                                          "<customer name=\"Kermit\" language=\"en\" />" +
+                                          "<customer name=\"John\" language=\"de\" />" +
+                                          "<provider name=\"Foobar\" />" +
+                                         "</data>");
+
+    java.util.Map xmlProviderAttrMap = new HashMap();
+    xmlProviderAttrMap.put("@name", new ValString("Foobar"));
+
+    java.util.Map xmlCustomerAttrMap1 = new HashMap();
+    xmlCustomerAttrMap1.put("@name", new ValString("Kermit"));
+    xmlCustomerAttrMap1.put("@language", new ValString("en"));
+
+    java.util.Map xmlCustomerAttrMap2 = new HashMap();
+    xmlCustomerAttrMap2.put("@name", new ValString("John"));
+    xmlCustomerAttrMap2.put("@language", new ValString("de"));
+
+    java.util.Map xmlInnerMap = new HashMap();
+    xmlInnerMap.put("provider", valueMapper.toVal(xmlProviderAttrMap));
+    xmlInnerMap.put("customer", valueMapper.toVal(Arrays.asList(xmlCustomerAttrMap1, xmlCustomerAttrMap2)));
+
+    java.util.Map xmlContextMap = new HashMap();
+    xmlContextMap.put("data", valueMapper.toVal(xmlInnerMap));
+
+    ValContext context = (ValContext) valueMapper.toVal(xmlContextMap);
+
+    // when
+    Val value = valueMapper.toVal(xml);
+
+    // then
+    assertThat(value).isEqualTo(context);
+  }
+
+  @Test
+  public void shouldMapCamundaSpinXMLobjectWithContent() {
+    // given
+    SpinXmlElement xml = Spin.XML("<customer>Kermit</customer>");
+
+    java.util.Map xmlInnerMap = new HashMap();
+    xmlInnerMap.put("$content", new ValString("Kermit"));
+
+    java.util.Map xmlContextMap = new HashMap();
+    xmlContextMap.put("customer", valueMapper.toVal(xmlInnerMap));
+
+    ValContext context = (ValContext) valueMapper.toVal(xmlContextMap);
+
+    // when
+    Val value = valueMapper.toVal(xml);
+
+    // then
+    assertThat(value).isEqualTo(context);
+  }
+
+  @Test
+  public void shouldMapCamundaSpinXMLobjectWithoutContent() {
+    // given
+    SpinXmlElement xml = Spin.XML("<customer />");
+    ValContext context = (ValContext) valueMapper.toVal(Collections.singletonMap("customer", null));
+
+    // when
+    Val value = valueMapper.toVal(xml);
+
+    // then
+    assertThat(value).isEqualTo(context);
+  }
+
+  @Test
+  public void shouldMapCamundaSpinXMLobjectWithPrefix() {
+    // given
+    SpinXmlElement xml = Spin.XML("<data xmlns:p=\"http://www.example.org\">" +
+                                          "<p:customer p:name=\"Kermit\" language=\"en\" />" +
+                                        "</data>");
+
+    java.util.Map xmlAttrMap = new HashMap();
+    xmlAttrMap.put("@p$name", new ValString("Kermit"));
+    xmlAttrMap.put("@language", new ValString("en"));
+
+    java.util.Map xmlInnerMap = new HashMap();
+    xmlInnerMap.put("p$customer", valueMapper.toVal(xmlAttrMap));
+    xmlInnerMap.put("@xmlns$p", new ValString("http://www.example.org"));
+
+    java.util.Map xmlContextMap = new HashMap();
+    xmlContextMap.put("data", valueMapper.toVal(xmlInnerMap));
+
+    ValContext context = (ValContext) valueMapper.toVal(xmlContextMap);
+
+    // when
+    Val value = valueMapper.toVal(xml);
+
+    // then
+    assertThat(value).isEqualTo(context);
+  }
 }
