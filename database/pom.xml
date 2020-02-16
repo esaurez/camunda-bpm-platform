@@ -266,9 +266,12 @@
     <profile>
       <id>mariadb</id>
       <properties>
+        <database.url>jdbc:mariadb://localhost:3306/camunda</database.url>
         <database.type>mariadb</database.type>
         <database.driver>org.mariadb.jdbc.Driver</database.driver>
         <database.datasource.class>org.mariadb.jdbc.MySQLDataSource</database.datasource.class>
+        <database.username>root</database.username>
+        <database.password>metriccluster</database.password>
       </properties>
 
       <dependencies>
@@ -471,10 +474,13 @@
       <id>postgresql</id>
       <properties>
         <database.type>postgres</database.type>
+        <database.url>jdbc:postgresql://localhost:5432/camunda</database.url>
         <database.driver>org.postgresql.Driver</database.driver>
         <database.datasource.class>org.postgresql.ds.PGSimpleDataSource</database.datasource.class>
         <jboss.datasource.filename>postgresql-ds.xml</jboss.datasource.filename>
         <hibernate.dialect>org.hibernate.dialect.PostgreSQLDialect</hibernate.dialect>
+        <database.username>root</database.username>
+        <database.password>metriccluster</database.password>
       </properties>
 
       <dependencies>
@@ -551,6 +557,8 @@
         <database.datasource.class>org.apache.commons.dbcp.BasicDataSource</database.datasource.class>
         <jboss.datasource.filename>postgresql-ds.xml</jboss.datasource.filename>
         <hibernate.dialect>org.hibernate.dialect.PostgreSQLDialect</hibernate.dialect>
+        <database.username>root</database.username>
+        <database.password>metriccluster</database.password>
       </properties>
 
       <dependencies>
@@ -584,6 +592,8 @@
         <database.type>metric</database.type>
         <database.driver>org.apache.calcite.avatica.remote.Drive</database.driver>
         <database.datasource.class>org.apache.commons.dbcp.BasicDataSource</database.datasource.class>
+        <database.username>root</database.username>
+        <database.password>metriccluster</database.password>
       </properties>
       <dependencies>
         <dependency>
