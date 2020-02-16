@@ -553,6 +553,7 @@
       <id>pmetric</id>
       <properties>
         <database.type>pmetric</database.type>
+        <database.url>jdbc:avatica:remote:url=http://localhost:30000;serialization=protobuf</database.url>
         <database.driver>org.apache.calcite.avatica.remote.Drive</database.driver>
         <database.datasource.class>org.apache.commons.dbcp.BasicDataSource</database.datasource.class>
         <jboss.datasource.filename>postgresql-ds.xml</jboss.datasource.filename>
@@ -590,6 +591,7 @@
       <id>metric</id>
       <properties>
         <database.type>metric</database.type>
+        <database.url>jdbc:avatica:remote:url=http://localhost:30000;serialization=protobuf</database.url>
         <database.driver>org.apache.calcite.avatica.remote.Drive</database.driver>
         <database.datasource.class>org.apache.commons.dbcp.BasicDataSource</database.datasource.class>
         <database.username>root</database.username>
