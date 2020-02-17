@@ -622,5 +622,44 @@
         </pluginManagement>
       </build>
     </profile>
+    <profile>
+      <id>cockroachdb</id>
+      <properties>
+        <database.type>cockroachdb</database.type>
+	<database.url>jdbc:postgresql://localhost:26257/camunda</database.url>
+        <database.driver>org.postgresql.Driver</database.driver>
+        <database.datasource.class>org.postgresql.ds.PGSimpleDataSource</database.datasource.class>
+        <jboss.datasource.filename>postgresql-ds.xml</jboss.datasource.filename>
+        <hibernate.dialect>org.hibernate.dialect.PostgreSQLDialect</hibernate.dialect>
+        <database.username>root</database.username>
+        <database.password>metriccluster</database.password>
+      </properties>
+
+      <dependencies>
+        <dependency>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>sql-maven-plugin</artifactId>
+              <dependencies>
+                <dependency>
+                  <groupId>org.postgresql</groupId>
+                  <artifactId>postgresql</artifactId>
+                  <version>${version.postgresql}</version>
+                </dependency>
+              </dependencies>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+
   </profiles>
 </project>
