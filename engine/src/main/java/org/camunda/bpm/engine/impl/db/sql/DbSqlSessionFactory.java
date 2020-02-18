@@ -41,7 +41,9 @@ public class DbSqlSessionFactory implements SessionFactory {
   public static final String MYSQL = "mysql";
   public static final String POSTGRES = "postgres";
   public static final String MARIADB = "mariadb";
-  public static final String[] SUPPORTED_DATABASES = {MSSQL, DB2, ORACLE, H2, MYSQL, POSTGRES, MARIADB};
+  public static final String METRIC = "metric";
+  public static final String PMETRIC = "pmetric";
+  public static final String[] SUPPORTED_DATABASES = {MSSQL, DB2, ORACLE, H2, MYSQL, POSTGRES, MARIADB, METRIC, PMETRIC};
 
   protected static final Map<String, Map<String, String>> databaseSpecificStatements = new HashMap<String, Map<String,String>>();
 
@@ -139,7 +141,7 @@ public class DbSqlSessionFactory implements SessionFactory {
 
     // mysql specific
     // use the same specific for mariadb since it based on mysql and work with the exactly same statements
-    for(String mysqlLikeDatabase : Arrays.asList(MYSQL, MARIADB)) {
+    for(String mysqlLikeDatabase : Arrays.asList(MYSQL, MARIADB, METRIC)) {
 
       databaseSpecificLimitBeforeStatements.put(mysqlLikeDatabase, "");
       optimizeDatabaseSpecificLimitBeforeWithoutOffsetStatements.put(mysqlLikeDatabase, "");
@@ -223,91 +225,93 @@ public class DbSqlSessionFactory implements SessionFactory {
     }
 
     // postgres specific
-    databaseSpecificLimitBeforeStatements.put(POSTGRES, "");
-    optimizeDatabaseSpecificLimitBeforeWithoutOffsetStatements.put(POSTGRES, "");
-    databaseSpecificLimitAfterStatements.put(POSTGRES, "LIMIT #{maxResults} OFFSET #{firstResult}");
-    optimizeDatabaseSpecificLimitAfterWithoutOffsetStatements.put(POSTGRES, "LIMIT #{maxResults}");
-    databaseSpecificLimitBeforeWithoutOffsetStatements.put(POSTGRES, "");
-    databaseSpecificLimitAfterWithoutOffsetStatements.put(POSTGRES, "LIMIT #{maxResults}");
-    databaseSpecificInnerLimitAfterStatements.put(POSTGRES, databaseSpecificLimitAfterStatements.get(POSTGRES));
-    databaseSpecificLimitBetweenStatements.put(POSTGRES, "");
-    databaseSpecificLimitBetweenFilterStatements.put(POSTGRES, "");
-    databaseSpecificOrderByStatements.put(POSTGRES, defaultOrderBy);
-    databaseSpecificLimitBeforeNativeQueryStatements.put(POSTGRES, "");
-    databaseSpecificDistinct.put(POSTGRES, "distinct");
+    for(String postgresLikeDatabase : Arrays.asList(POSTGRES, PMETRIC)) {
+      databaseSpecificLimitBeforeStatements.put(postgresLikeDatabase, "");
+      optimizeDatabaseSpecificLimitBeforeWithoutOffsetStatements.put(postgresLikeDatabase, "");
+      databaseSpecificLimitAfterStatements.put(postgresLikeDatabase, "LIMIT #{maxResults} OFFSET #{firstResult}");
+      optimizeDatabaseSpecificLimitAfterWithoutOffsetStatements.put(postgresLikeDatabase, "LIMIT #{maxResults}");
+      databaseSpecificLimitBeforeWithoutOffsetStatements.put(postgresLikeDatabase, "");
+      databaseSpecificLimitAfterWithoutOffsetStatements.put(postgresLikeDatabase, "LIMIT #{maxResults}");
+      databaseSpecificInnerLimitAfterStatements.put(postgresLikeDatabase, databaseSpecificLimitAfterStatements.get(postgresLikeDatabase));
+      databaseSpecificLimitBetweenStatements.put(postgresLikeDatabase, "");
+      databaseSpecificLimitBetweenFilterStatements.put(postgresLikeDatabase, "");
+      databaseSpecificOrderByStatements.put(postgresLikeDatabase, defaultOrderBy);
+      databaseSpecificLimitBeforeNativeQueryStatements.put(postgresLikeDatabase, "");
+      databaseSpecificDistinct.put(postgresLikeDatabase, "distinct");
 
-    databaseSpecificEscapeChar.put(POSTGRES, defaultEscapeChar);
+      databaseSpecificEscapeChar.put(postgresLikeDatabase, defaultEscapeChar);
 
-    databaseSpecificBitAnd1.put(POSTGRES, "");
-    databaseSpecificBitAnd2.put(POSTGRES, " & ");
-    databaseSpecificBitAnd3.put(POSTGRES, "");
-    databaseSpecificDatepart1.put(POSTGRES, "extract(");
-    databaseSpecificDatepart2.put(POSTGRES, " from ");
-    databaseSpecificDatepart3.put(POSTGRES, ")");
+      databaseSpecificBitAnd1.put(postgresLikeDatabase, "");
+      databaseSpecificBitAnd2.put(postgresLikeDatabase, " & ");
+      databaseSpecificBitAnd3.put(postgresLikeDatabase, "");
+      databaseSpecificDatepart1.put(postgresLikeDatabase, "extract(");
+      databaseSpecificDatepart2.put(postgresLikeDatabase, " from ");
+      databaseSpecificDatepart3.put(postgresLikeDatabase, ")");
 
-    databaseSpecificDummyTable.put(POSTGRES, "");
-    databaseSpecificTrueConstant.put(POSTGRES, "true");
-    databaseSpecificFalseConstant.put(POSTGRES, "false");
-    databaseSpecificIfNull.put(POSTGRES, "COALESCE");
+      databaseSpecificDummyTable.put(postgresLikeDatabase, "");
+      databaseSpecificTrueConstant.put(postgresLikeDatabase, "true");
+      databaseSpecificFalseConstant.put(postgresLikeDatabase, "false");
+      databaseSpecificIfNull.put(postgresLikeDatabase, "COALESCE");
 
-    databaseSpecificDaysComparator.put(POSTGRES, "EXTRACT (DAY FROM #{currentTimestamp} - ${date}) >= ${days}");
+      databaseSpecificDaysComparator.put(postgresLikeDatabase, "EXTRACT (DAY FROM #{currentTimestamp} - ${date}) >= ${days}");
 
-    databaseSpecificCollationForCaseSensitivity.put(POSTGRES, "");
+      databaseSpecificCollationForCaseSensitivity.put(postgresLikeDatabase, "");
 
-    addDatabaseSpecificStatement(POSTGRES, "insertByteArray", "insertByteArray_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "updateByteArray", "updateByteArray_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectByteArray", "selectByteArray_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectByteArrays", "selectByteArrays_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectResourceByDeploymentIdAndResourceName", "selectResourceByDeploymentIdAndResourceName_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectResourceByDeploymentIdAndResourceNames", "selectResourceByDeploymentIdAndResourceNames_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectResourceByDeploymentIdAndResourceId", "selectResourceByDeploymentIdAndResourceId_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectResourceByDeploymentIdAndResourceIds", "selectResourceByDeploymentIdAndResourceIds_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectResourcesByDeploymentId", "selectResourcesByDeploymentId_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectLatestResourcesByDeploymentName", "selectLatestResourcesByDeploymentName_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "insertIdentityInfo", "insertIdentityInfo_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "updateIdentityInfo", "updateIdentityInfo_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectIdentityInfoById", "selectIdentityInfoById_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectIdentityInfoByUserIdAndKey", "selectIdentityInfoByUserIdAndKey_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectIdentityInfoByUserId", "selectIdentityInfoByUserId_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectIdentityInfoDetails", "selectIdentityInfoDetails_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "insertComment", "insertComment_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectCommentsByTaskId", "selectCommentsByTaskId_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectCommentsByProcessInstanceId", "selectCommentsByProcessInstanceId_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectCommentByTaskIdAndCommentId", "selectCommentByTaskIdAndCommentId_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectEventsByTaskId", "selectEventsByTaskId_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectFilterByQueryCriteria", "selectFilterByQueryCriteria_postgres");
-    addDatabaseSpecificStatement(POSTGRES, "selectFilter", "selectFilter_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "insertByteArray", "insertByteArray_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "updateByteArray", "updateByteArray_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectByteArray", "selectByteArray_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectByteArrays", "selectByteArrays_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectResourceByDeploymentIdAndResourceName", "selectResourceByDeploymentIdAndResourceName_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectResourceByDeploymentIdAndResourceNames", "selectResourceByDeploymentIdAndResourceNames_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectResourceByDeploymentIdAndResourceId", "selectResourceByDeploymentIdAndResourceId_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectResourceByDeploymentIdAndResourceIds", "selectResourceByDeploymentIdAndResourceIds_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectResourcesByDeploymentId", "selectResourcesByDeploymentId_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectLatestResourcesByDeploymentName", "selectLatestResourcesByDeploymentName_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "insertIdentityInfo", "insertIdentityInfo_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "updateIdentityInfo", "updateIdentityInfo_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectIdentityInfoById", "selectIdentityInfoById_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectIdentityInfoByUserIdAndKey", "selectIdentityInfoByUserIdAndKey_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectIdentityInfoByUserId", "selectIdentityInfoByUserId_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectIdentityInfoDetails", "selectIdentityInfoDetails_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "insertComment", "insertComment_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectCommentsByTaskId", "selectCommentsByTaskId_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectCommentsByProcessInstanceId", "selectCommentsByProcessInstanceId_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectCommentByTaskIdAndCommentId", "selectCommentByTaskIdAndCommentId_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectEventsByTaskId", "selectEventsByTaskId_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectFilterByQueryCriteria", "selectFilterByQueryCriteria_postgres");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "selectFilter", "selectFilter_postgres");
 
-    addDatabaseSpecificStatement(POSTGRES, "deleteAttachmentsByRemovalTime", "deleteAttachmentsByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteCommentsByRemovalTime", "deleteCommentsByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteHistoricActivityInstancesByRemovalTime", "deleteHistoricActivityInstancesByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteHistoricDecisionInputInstancesByRemovalTime", "deleteHistoricDecisionInputInstancesByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteHistoricDecisionInstancesByRemovalTime", "deleteHistoricDecisionInstancesByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteHistoricDecisionOutputInstancesByRemovalTime", "deleteHistoricDecisionOutputInstancesByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteHistoricDetailsByRemovalTime", "deleteHistoricDetailsByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteExternalTaskLogByRemovalTime", "deleteExternalTaskLogByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteHistoricIdentityLinkLogByRemovalTime", "deleteHistoricIdentityLinkLogByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteHistoricIncidentsByRemovalTime", "deleteHistoricIncidentsByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteJobLogByRemovalTime", "deleteJobLogByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteHistoricProcessInstancesByRemovalTime", "deleteHistoricProcessInstancesByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteHistoricTaskInstancesByRemovalTime", "deleteHistoricTaskInstancesByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteHistoricVariableInstancesByRemovalTime", "deleteHistoricVariableInstancesByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteUserOperationLogByRemovalTime", "deleteUserOperationLogByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteByteArraysByRemovalTime", "deleteByteArraysByRemovalTime_postgres_or_db2");
-    addDatabaseSpecificStatement(POSTGRES, "deleteHistoricBatchesByRemovalTime", "deleteHistoricBatchesByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteAttachmentsByRemovalTime", "deleteAttachmentsByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteCommentsByRemovalTime", "deleteCommentsByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteHistoricActivityInstancesByRemovalTime", "deleteHistoricActivityInstancesByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteHistoricDecisionInputInstancesByRemovalTime", "deleteHistoricDecisionInputInstancesByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteHistoricDecisionInstancesByRemovalTime", "deleteHistoricDecisionInstancesByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteHistoricDecisionOutputInstancesByRemovalTime", "deleteHistoricDecisionOutputInstancesByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteHistoricDetailsByRemovalTime", "deleteHistoricDetailsByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteExternalTaskLogByRemovalTime", "deleteExternalTaskLogByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteHistoricIdentityLinkLogByRemovalTime", "deleteHistoricIdentityLinkLogByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteHistoricIncidentsByRemovalTime", "deleteHistoricIncidentsByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteJobLogByRemovalTime", "deleteJobLogByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteHistoricProcessInstancesByRemovalTime", "deleteHistoricProcessInstancesByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteHistoricTaskInstancesByRemovalTime", "deleteHistoricTaskInstancesByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteHistoricVariableInstancesByRemovalTime", "deleteHistoricVariableInstancesByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteUserOperationLogByRemovalTime", "deleteUserOperationLogByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteByteArraysByRemovalTime", "deleteByteArraysByRemovalTime_postgres_or_db2");
+      addDatabaseSpecificStatement(postgresLikeDatabase, "deleteHistoricBatchesByRemovalTime", "deleteHistoricBatchesByRemovalTime_postgres_or_db2");
 
-    constants = new HashMap<String, String>();
-    constants.put("constant.event", "'event'");
-    constants.put("constant.op_message", "NEW_VALUE_ || '_|_' || PROPERTY_");
-    constants.put("constant_for_update", "for update");
-    constants.put("constant.datepart.quarter", "QUARTER");
-    constants.put("constant.datepart.month", "MONTH");
-    constants.put("constant.datepart.minute", "MINUTE");
-    constants.put("constant.null.startTime", "null START_TIME_");
-    constants.put("constant.varchar.cast", "cast('${key}' as varchar(64))");
-    constants.put("constant.integer.cast", "cast(NULL as integer)");
-    constants.put("constant.null.reporter", "CAST(NULL AS VARCHAR) AS REPORTER_");
-    dbSpecificConstants.put(POSTGRES, constants);
+      constants = new HashMap<String, String>();
+      constants.put("constant.event", "'event'");
+      constants.put("constant.op_message", "NEW_VALUE_ || '_|_' || PROPERTY_");
+      constants.put("constant_for_update", "for update");
+      constants.put("constant.datepart.quarter", "QUARTER");
+      constants.put("constant.datepart.month", "MONTH");
+      constants.put("constant.datepart.minute", "MINUTE");
+      constants.put("constant.null.startTime", "null START_TIME_");
+      constants.put("constant.varchar.cast", "cast('${key}' as varchar(64))");
+      constants.put("constant.integer.cast", "cast(NULL as integer)");
+      constants.put("constant.null.reporter", "CAST(NULL AS VARCHAR) AS REPORTER_");
+      dbSpecificConstants.put(postgresLikeDatabase, constants);
+    }
 
     // oracle
     databaseSpecificLimitBeforeStatements.put(ORACLE, "select * from ( select a.*, ROWNUM rnum from (");

@@ -553,9 +553,8 @@
       <id>pmetric</id>
       <properties>
         <database.type>pmetric</database.type>
-        <database.url>jdbc:avatica:remote:url=http://localhost:30000;serialization=protobuf</database.url>
-        <database.driver>org.apache.calcite.avatica.remote.Drive</database.driver>
-        <database.datasource.class>org.apache.commons.dbcp.BasicDataSource</database.datasource.class>
+        <database.url>jdbc:avatica:remote:url=http://192.168.124.160:30000;serialization=protobuf</database.url>
+        <database.driver>org.apache.calcite.avatica.remote.Driver</database.driver>
         <jboss.datasource.filename>postgresql-ds.xml</jboss.datasource.filename>
         <hibernate.dialect>org.hibernate.dialect.PostgreSQLDialect</hibernate.dialect>
         <database.username>root</database.username>
@@ -591,9 +590,8 @@
       <id>metric</id>
       <properties>
         <database.type>metric</database.type>
-        <database.url>jdbc:avatica:remote:url=http://localhost:30000;serialization=protobuf</database.url>
-        <database.driver>org.apache.calcite.avatica.remote.Drive</database.driver>
-        <database.datasource.class>org.apache.commons.dbcp.BasicDataSource</database.datasource.class>
+        <database.url>jdbc:avatica:remote:url=http://192.168.124.160:30000;serialization=protobuf</database.url>
+        <database.driver>org.apache.calcite.avatica.remote.Driver</database.driver>
         <database.username>root</database.username>
         <database.password>metriccluster</database.password>
       </properties>

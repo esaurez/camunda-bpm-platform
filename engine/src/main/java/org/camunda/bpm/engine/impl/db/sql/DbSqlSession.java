@@ -464,6 +464,8 @@ public class DbSqlSession extends AbstractPersistenceSession {
 
   public boolean isTablePresent(String tableName) {
     tableName = prependDatabaseTablePrefix(tableName);
+    String databaseType = dbSqlSessionFactory.getDatabaseType();
+
     Connection connection = null;
     try {
       connection = sqlSession.getConnection();
@@ -475,9 +477,7 @@ public class DbSqlSession extends AbstractPersistenceSession {
         schema = dbSqlSessionFactory.getDatabaseSchema();
       }
 
-      String databaseType = dbSqlSessionFactory.getDatabaseType();
-
-      if (DbSqlSessionFactory.POSTGRES.equals(databaseType)) {
+      if (DbSqlSessionFactory.POSTGRES.equals(databaseType) || DbSqlSessionFactory.PMETRIC.equals(databaseType)) {
         tableName = tableName.toLowerCase();
       }
 
@@ -491,6 +491,12 @@ public class DbSqlSession extends AbstractPersistenceSession {
       }
 
     } catch (Exception e) {
+      if(connection != null){
+        try{
+          connection.close();
+	}
+        catch(Exception e2){}
+      }
       throw LOG.checkDatabaseTableException(e);
     }
   }
@@ -513,7 +519,8 @@ public class DbSqlSession extends AbstractPersistenceSession {
           String tableNameFilter = prependDatabaseTablePrefix("ACT_%");
 
           // for postgres we have to use lower case
-          if (DbSqlSessionFactory.POSTGRES.equals(getDbSqlSessionFactory().getDatabaseType())) {
+          if (DbSqlSessionFactory.POSTGRES.equals(getDbSqlSessionFactory().getDatabaseType()) ||
+                DbSqlSessionFactory.PMETRIC.equals(getDbSqlSessionFactory().getDatabaseType())) {
             schema = schema == null ? schema : schema.toLowerCase();
             tableNameFilter = tableNameFilter.toLowerCase();
           }

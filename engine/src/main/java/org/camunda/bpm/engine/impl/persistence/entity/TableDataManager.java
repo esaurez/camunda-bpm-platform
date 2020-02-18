@@ -256,7 +256,8 @@ public class TableDataManager extends AbstractManager {
             .getConnection()
             .getMetaData();
 
-        if (DbSqlSessionFactory.POSTGRES.equals(getDbSqlSession().getDbSqlSessionFactory().getDatabaseType())) {
+        if (DbSqlSessionFactory.POSTGRES.equals(getDbSqlSession().getDbSqlSessionFactory().getDatabaseType()) || 
+              DbSqlSessionFactory.PMETRIC.equals(getDbSqlSession().getDbSqlSessionFactory().getDatabaseType())) {
           tableName = tableName.toLowerCase();
         }
 
