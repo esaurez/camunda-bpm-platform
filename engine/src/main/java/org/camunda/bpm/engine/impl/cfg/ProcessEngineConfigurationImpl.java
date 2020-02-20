@@ -1303,6 +1303,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
     databaseTypeMappings.setProperty(MY_SQL_PRODUCT_NAME, "mysql");
     databaseTypeMappings.setProperty(MARIA_DB_PRODUCT_NAME, "mariadb");
     databaseTypeMappings.setProperty("Oracle", "oracle");
+    databaseTypeMappings.setProperty("Avatica", "metric");
     databaseTypeMappings.setProperty("PostgreSQL", "postgres");
     databaseTypeMappings.setProperty("Microsoft SQL Server", "mssql");
     databaseTypeMappings.setProperty("DB2", "db2");
