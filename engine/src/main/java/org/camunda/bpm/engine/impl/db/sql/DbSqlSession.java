@@ -156,6 +156,7 @@ public class DbSqlSession extends AbstractPersistenceSession {
     // get statement
     String insertStatement = dbSqlSessionFactory.getInsertStatement(dbEntity);
     insertStatement = dbSqlSessionFactory.mapStatement(insertStatement);
+    System.out.println(insertStatement);
     ensureNotNull("no insert statement for " + dbEntity.getClass() + " in the ibatis mapping files", "insertStatement", insertStatement);
 
     // execute the insert

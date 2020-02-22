@@ -686,7 +686,7 @@ public class EnginePersistenceLogger extends ProcessEngineLogger {
 
     String exceptionMessage = exceptionMessage(
       "083",
-      "Exception while executing Batch Database Operations with message '{}'. Flush summary: \n {}", message,
+      "Hello! There was an exception while executing Batch Database Operations with message '{}'. Flush summary: \n {}", message,
       buildStringFromList(operationsToFlush)
     );
 
@@ -733,5 +733,19 @@ public class EnginePersistenceLogger extends ProcessEngineLogger {
         permission
         ));
   }
+
+  public void testLog(String error) {
+    logError(
+        "089", error);
+  }
+
+  public void stackTraceLog(StackTraceElement[] ste){
+     for(StackTraceElement elem: ste){
+        logError(
+	  "090", elem.toString());
+     }
+   
+  } 
+
 
 }

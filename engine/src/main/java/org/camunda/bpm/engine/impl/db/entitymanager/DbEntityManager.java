@@ -357,7 +357,7 @@ public class DbEntityManager implements Session, EntityLoadListener {
       try {
         flushResult = persistenceSession.flushOperations();
       } catch (Exception e) {
-        if(e.getCause().getMessage().startsWith("Remote driver error: FoundOne: (null exception message)")){
+        if(e.getCause().getMessage().endsWith("Remote driver error: FoundOne: (null exception message)")){
           metricFail = true;
         }
         else {
