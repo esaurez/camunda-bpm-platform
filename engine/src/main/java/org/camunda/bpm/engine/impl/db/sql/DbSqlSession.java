@@ -92,9 +92,9 @@ public class DbSqlSession extends AbstractPersistenceSession {
     try {
       result = sqlSession.flushStatements();
     } catch(PersistenceException e){
-     if(e.getCause().getMessage().endsWith("Remote driver error: FoundOne: (null exception message)")){
-     }
-     else{
+      if (e.getMessage().contains("Remote driver error: FoundOne: (null exception message)") ||
+              e.getCause().getMessage().contains("Remote driver error: FoundOne: (null exception message)")) {
+      } else{
        throw e;
      }
     }
@@ -156,6 +156,7 @@ public class DbSqlSession extends AbstractPersistenceSession {
     // get statement
     String insertStatement = dbSqlSessionFactory.getInsertStatement(dbEntity);
     insertStatement = dbSqlSessionFactory.mapStatement(insertStatement);
+    System.out.println(insertStatement);
     ensureNotNull("no insert statement for " + dbEntity.getClass() + " in the ibatis mapping files", "insertStatement", insertStatement);
 
     // execute the insert
