@@ -553,7 +553,7 @@
       <id>pmetric</id>
       <properties>
         <database.type>pmetric</database.type>
-        <database.url>jdbc:avatica:remote:url=http://192.168.124.160:30000;serialization=protobuf</database.url>
+        <database.url>jdbc:avatica:remote:url=http://127.0.0.1:30000;serialization=protobuf</database.url>
         <database.driver>org.apache.calcite.avatica.remote.Driver</database.driver>
         <jboss.datasource.filename>postgresql-ds.xml</jboss.datasource.filename>
         <hibernate.dialect>org.hibernate.dialect.PostgreSQLDialect</hibernate.dialect>

@@ -357,17 +357,12 @@ public class DbEntityManager implements Session, EntityLoadListener {
       try {
         flushResult = persistenceSession.flushOperations();
       } catch (Exception e) {
-        if(e.getCause().getMessage().endsWith("Remote driver error: FoundOne: (null exception message)")){
-          metricFail = true;
-        }
-        else {
-          //some of the exceptions are considered to be optimistic locking exception
-          DbOperation failedOperation = hasOptimisticLockingException(operationsToFlush, e);
-          if (failedOperation == null) {
-            throw LOG.flushDbOperationsException(allOperations, e);
-          } else {
-            handleOptimisticLockingException(failedOperation);
-          }
+        //some of the exceptions are considered to be optimistic locking exception
+        DbOperation failedOperation = hasOptimisticLockingException(operationsToFlush, e);
+        if (failedOperation == null) {
+          throw LOG.flushDbOperationsException(allOperations, e);
+        } else {
+          handleOptimisticLockingException(failedOperation);
         }
       }
       checkFlushResults(operationsToFlush, flushResult);
