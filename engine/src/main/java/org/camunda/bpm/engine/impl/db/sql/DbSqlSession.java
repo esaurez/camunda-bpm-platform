@@ -92,9 +92,9 @@ public class DbSqlSession extends AbstractPersistenceSession {
     try {
       result = sqlSession.flushStatements();
     } catch(PersistenceException e){
-     if(e.getCause().getMessage().endsWith("Remote driver error: FoundOne: (null exception message)")){
-     }
-     else{
+      if (e.getMessage().contains("Remote driver error: FoundOne: (null exception message)") ||
+              e.getCause().getMessage().contains("Remote driver error: FoundOne: (null exception message)")) {
+      } else{
        throw e;
      }
     }
