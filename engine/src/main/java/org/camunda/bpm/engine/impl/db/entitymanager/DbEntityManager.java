@@ -353,15 +353,21 @@ public class DbEntityManager implements Session, EntityLoadListener {
 
     if (Context.getProcessEngineConfiguration().isJdbcBatchProcessing()) {
       List<BatchResult> flushResult = new ArrayList<BatchResult>();
+      boolean metricFail = false;
       try {
         flushResult = persistenceSession.flushOperations();
       } catch (Exception e) {
-        //some of the exceptions are considered to be optimistic locking exception
-        DbOperation failedOperation = hasOptimisticLockingException(operationsToFlush, e);
-        if (failedOperation == null) {
-          throw LOG.flushDbOperationsException(allOperations, e);
-        } else {
-          handleOptimisticLockingException(failedOperation);
+        if(e.getCause().getMessage().startsWith("Remote driver error: FoundOne: (null exception message)")){
+          metricFail = true;
+        }
+        else {
+          //some of the exceptions are considered to be optimistic locking exception
+          DbOperation failedOperation = hasOptimisticLockingException(operationsToFlush, e);
+          if (failedOperation == null) {
+            throw LOG.flushDbOperationsException(allOperations, e);
+          } else {
+            handleOptimisticLockingException(failedOperation);
+          }
         }
       }
       checkFlushResults(operationsToFlush, flushResult);
