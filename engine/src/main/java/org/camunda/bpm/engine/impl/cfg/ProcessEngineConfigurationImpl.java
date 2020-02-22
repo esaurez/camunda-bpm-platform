@@ -1296,6 +1296,8 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   protected static Properties databaseTypeMappings = getDefaultDatabaseTypeMappings();
   protected static final String MY_SQL_PRODUCT_NAME = "MySQL";
   protected static final String MARIA_DB_PRODUCT_NAME = "MariaDB";
+  protected static final String AVATICA_PRODUCT_NAME = "Avatica";
+  protected static final String PMETRIC_PRODUCT_NAME = "PMetric";
 
   protected static Properties getDefaultDatabaseTypeMappings() {
     Properties databaseTypeMappings = new Properties();
@@ -1303,10 +1305,10 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
     databaseTypeMappings.setProperty(MY_SQL_PRODUCT_NAME, "mysql");
     databaseTypeMappings.setProperty(MARIA_DB_PRODUCT_NAME, "mariadb");
     databaseTypeMappings.setProperty("Oracle", "oracle");
-    databaseTypeMappings.setProperty("Avatica", "metric");
+    databaseTypeMappings.setProperty(AVATICA_PRODUCT_NAME, "metric");
+    databaseTypeMappings.setProperty(PMETRIC_PRODUCT_NAME, "pmetric");
     databaseTypeMappings.setProperty("PostgreSQL", "postgres");
     databaseTypeMappings.setProperty("Microsoft SQL Server", "mssql");
-    databaseTypeMappings.setProperty("DB2", "db2");
     databaseTypeMappings.setProperty("DB2", "db2");
     databaseTypeMappings.setProperty("DB2/NT", "db2");
     databaseTypeMappings.setProperty("DB2/NT64", "db2");
@@ -1336,6 +1338,9 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
       String databaseProductName = databaseMetaData.getDatabaseProductName();
       if (MY_SQL_PRODUCT_NAME.equals(databaseProductName)) {
         databaseProductName = checkForMariaDb(databaseMetaData, databaseProductName);
+      }
+      if (AVATICA_PRODUCT_NAME.equals(databaseProductName)) {
+        databaseProductName = checkForPMetric(databaseMetaData, databaseProductName);
       }
       LOG.debugDatabaseproductName(databaseProductName);
       databaseType = databaseTypeMappings.getProperty(databaseProductName);
@@ -1382,6 +1387,43 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
       return MARIA_DB_PRODUCT_NAME;
     }
 
+    return databaseName;
+  }
+
+  /**
+   * The product name of pmetric is also 'Avatica'. This method
+   * tries if it can find some evidence for pmetric. If it is successful
+   * it will return "MariaDB", otherwise the provided database name.
+   */
+  protected String checkForPMetric(DatabaseMetaData databaseMetaData, String databaseName) {
+    try {
+      String databaseProductVersion = databaseMetaData.getDatabaseProductVersion();
+      if (databaseProductVersion != null && databaseProductVersion.toLowerCase().contains("pmetric")) {
+        return PMETRIC_PRODUCT_NAME;
+      }
+    } catch (SQLException ignore) {
+    }
+
+    try {
+      String driverName = databaseMetaData.getDriverName();
+      if (driverName != null && driverName.toLowerCase().contains("pmetric")) {
+        return PMETRIC_PRODUCT_NAME;
+      }
+    } catch (SQLException ignore) {
+    }
+
+    String metaDataClassName = databaseMetaData.getClass().getName();
+    if (metaDataClassName != null && metaDataClassName.toLowerCase().contains("pmetric")) {
+      return PMETRIC_PRODUCT_NAME;
+    }
+
+    try {
+      String urlHack = databaseMetaData.getURL();
+      if(!urlHack.contains("localhost")){
+        return PMETRIC_PRODUCT_NAME;
+      }
+    } catch (SQLException e) {
+    }
     return databaseName;
   }
 
