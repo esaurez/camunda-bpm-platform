@@ -92,9 +92,9 @@ public class PerfTestRunner {
     // run a pass for each number of threads
     new Thread() {
       public void run() {
-        for (int i = 1; i <= configuration.getNumberOfThreads(); i++) {
-          runPassWithThreadCount(i);
-        }
+        //for (int i = 1; i <= configuration.getNumberOfThreads(); i++) {
+          runPassWithThreadCount(configuration.getNumberOfThreads());//i);
+        //}
 
         synchronized (doneMonitor) {
           isDone = true;
