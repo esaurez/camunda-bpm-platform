@@ -30,7 +30,7 @@ import org.junit.Test;
  */
 public class SequencePerformanceTest extends ProcessEnginePerformanceTestCase {
 
-  @Test
+/*  @Test
   @Deployment
   public void syncSequence1Step() {
     performanceTest()
@@ -46,6 +46,8 @@ public class SequencePerformanceTest extends ProcessEnginePerformanceTestCase {
     .run();
   }
 
+ */
+
   @Test
   @Deployment
   public void syncSequence15Steps() {
@@ -54,6 +56,7 @@ public class SequencePerformanceTest extends ProcessEnginePerformanceTestCase {
     .run();
   }
 
+  /*
   @Test
   @Deployment
   public void asyncSequence1Step() {
@@ -80,7 +83,5 @@ public class SequencePerformanceTest extends ProcessEnginePerformanceTestCase {
       .steps(15, new SignalExecutionStep(engine, PROCESS_INSTANCE_ID))
     .run();
   }
-
-
-
+   */
 }
