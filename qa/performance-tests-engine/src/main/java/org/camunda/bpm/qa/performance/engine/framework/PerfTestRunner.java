@@ -93,7 +93,8 @@ public class PerfTestRunner {
     new Thread() {
       public void run() {
         //for (int i = 1; i <= configuration.getNumberOfThreads(); i++) {
-          runPassWithThreadCount(configuration.getNumberOfThreads());//i);
+        runPassWithThreadCount(1);//i);
+        runPassWithThreadCount(configuration.getNumberOfThreads());//i);
         //}
 
         synchronized (doneMonitor) {
