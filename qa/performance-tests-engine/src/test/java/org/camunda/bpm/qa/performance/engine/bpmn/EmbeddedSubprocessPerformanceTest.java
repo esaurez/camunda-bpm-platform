@@ -30,7 +30,7 @@ import org.junit.Test;
  */
 public class EmbeddedSubprocessPerformanceTest extends ProcessEnginePerformanceTestCase {
 
-  @Test
+/*  @Test
   @Deployment
   public void sync1Subprocess() {
     performanceTest()
@@ -45,7 +45,7 @@ public class EmbeddedSubprocessPerformanceTest extends ProcessEnginePerformanceT
       .step(new StartProcessInstanceStep(engine, "process"))
     .run();
   }
-
+*/
   @Test
   @Deployment
   public void sync3Subprocesses() {
@@ -53,7 +53,7 @@ public class EmbeddedSubprocessPerformanceTest extends ProcessEnginePerformanceT
       .step(new StartProcessInstanceStep(engine, "process"))
     .run();
   }
-
+/*
   @Test
   @Deployment
   public void async1Subprocess() {
@@ -80,5 +80,5 @@ public class EmbeddedSubprocessPerformanceTest extends ProcessEnginePerformanceT
       .step(new SignalExecutionStep(engine, EXECUTION_ID))
     .run();
   }
-
+*/
 }
