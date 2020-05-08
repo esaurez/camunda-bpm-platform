@@ -312,6 +312,9 @@
         <database.type>mysql</database.type>
         <database.driver>com.mysql.jdbc.Driver</database.driver>
         <database.datasource.class>com.mysql.jdbc.jdbc2.optional.MysqlDataSource</database.datasource.class>
+        <database.url>jdbc:mysql://localhost:4000/camunda?verifyServerCertificate=false&useSSL=false&useConfigs=maxPerformance&useServerPrepStmts=true</database.url>
+        <database.username>root</database.username>
+        <database.password>metriccluster</database.password>
       </properties>
 
       <dependencies>
