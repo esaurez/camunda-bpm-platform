@@ -312,7 +312,7 @@
         <database.type>mysql</database.type>
         <database.driver>com.mysql.jdbc.Driver</database.driver>
         <database.datasource.class>com.mysql.jdbc.jdbc2.optional.MysqlDataSource</database.datasource.class>
-        <database.url>jdbc:mysql://localhost:4000/camunda?verifyServerCertificate=false&useSSL=false&useConfigs=maxPerformance&useServerPrepStmts=true</database.url>
+        <database.url>jdbc:mysql://localhost:4000/camunda?verifyServerCertificate=false&amp;useSSL=false&amp;useConfigs=maxPerformance&amp;useServerPrepStmts=true</database.url>
         <database.username>root</database.username>
         <database.password>metriccluster</database.password>
       </properties>
@@ -558,8 +558,6 @@
         <database.type>pmetric</database.type>
         <database.url>jdbc:avatica:remote:url=http://127.0.0.1:30000;serialization=protobuf</database.url>
         <database.driver>org.apache.calcite.avatica.remote.Driver</database.driver>
-        <jboss.datasource.filename>postgresql-ds.xml</jboss.datasource.filename>
-        <hibernate.dialect>org.hibernate.dialect.PostgreSQLDialect</hibernate.dialect>
         <database.username>root</database.username>
         <database.password>metriccluster</database.password>
       </properties>
